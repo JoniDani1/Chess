@@ -1,8 +1,8 @@
 PROJECT: Pygame Chess Implementation
 STUDENT: JONI DANI
-MATRICULATION NO: 100007315
+5
 MODULE: Programming
-DATE: 15 December 2025
+
 
 =============================================================================
 1. PROJECT DESCRIPTION
