@@ -10,6 +10,70 @@ STALEMATE = 0
 DEPTH = 3  # Depth 2 = AI looks at: Its Move -> Your Reply. (Fast)
            # Depth 3 = AI looks at: Its Move -> Your Reply -> Its Reply. (Slower but smarter)
 
+knightScore =  [[1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 2, 2, 2, 2, 2, 2, 1],
+                [1, 2, 3, 3, 3, 3, 2, 1],
+                [1, 2, 3, 4, 4, 3, 2, 1],
+                [1, 2, 3, 4, 4, 3, 2, 1],
+                [1, 2, 3, 3, 3, 3, 2, 1],
+                [1, 2, 2, 2, 2, 2, 2, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1]]
+
+bishopScore =  [[4, 3, 2, 1, 1, 2, 3, 4],
+                [3, 4, 3, 2, 2, 3, 4, 3],
+                [2, 3, 4, 3, 3, 4, 3, 2],
+                [1, 2, 3, 4, 4, 3, 2, 1],
+                [1, 2, 3, 4, 4, 3, 2, 1],
+                [2, 3, 4, 3, 3, 4, 3, 2],
+                [3, 4, 3, 2, 2, 3, 4, 3],
+                [4, 3, 2, 1, 1, 2, 3, 4]]
+
+queenScore =   [[1, 1, 1, 3, 1, 1, 1, 1],
+                [1, 2, 3, 3, 3, 1, 1, 1],
+                [1, 4, 3, 3, 3, 4, 2, 1],
+                [1, 2, 3, 3, 3, 2, 2, 1],
+                [1, 2, 3, 3, 3, 2, 2, 1],
+                [1, 4, 3, 3, 3, 4, 2, 1],
+                [1, 2, 3, 3, 3, 1, 1, 1],
+                [1, 1, 1, 3, 1, 1, 1, 1]]
+
+rookScore =    [[4, 3, 4, 4, 4, 4, 3, 4],
+                [4, 4, 4, 4, 4, 4, 4, 4],
+                [1, 1, 2, 3, 3, 2, 1, 1],
+                [1, 2, 3, 4, 4, 3, 2, 1],
+                [1, 2, 3, 4, 4, 3, 2, 1],
+                [1, 1, 2, 3, 3, 2, 1, 1],
+                [4, 4, 4, 4, 4, 4, 4, 4],
+                [4, 3, 4, 4, 4, 4, 3, 4]]
+
+whitePawnScore =   [[8, 8, 8, 8, 8, 8, 8, 8],
+                    [8, 8, 8, 8, 8, 8, 8, 8],
+                    [5, 6, 6, 7, 7, 6, 6, 5],
+                    [2, 3, 3, 5, 5, 3, 3, 2],
+                    [1, 2, 3, 4, 4, 3, 2, 1],
+                    [1, 2, 3, 3, 3, 3, 2, 1],
+                    [1, 1, 1, 0, 0, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0]]
+
+blackPawnScore =   [[0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 1, 0, 0, 1, 1, 1],
+                    [1, 2, 3, 3, 3, 3, 2, 1],
+                    [1, 2, 3, 4, 4, 3, 2, 1],
+                    [2, 3, 3, 5, 5, 3, 3, 2],
+                    [5, 6, 6, 7, 7, 6, 6, 5],
+                    [8, 8, 8, 8, 8, 8, 8, 8],
+                    [8, 8, 8, 8, 8, 8, 8, 8]]
+kingScore = [
+    [ 2,  3,  1,  0,  0,  1,  3,  2],
+    [ 2,  2,  0,  0,  0,  0,  2,  2],
+    [-1, -2, -2, -2, -2, -2, -2, -1],
+    [-2, -3, -3, -4, -4, -3, -3, -2],
+    [-3, -4, -4, -5, -5, -4, -4, -3],
+    [-3, -4, -4, -5, -5, -4, -4, -3],
+    [-3, -4, -4, -5, -5, -4, -4, -3],
+    [-3, -4, -4, -5, -5, -4, -4, -3]
+]
+
 def find_best_move(gs, valid_moves):
     global next_move
     next_move = None
@@ -79,10 +143,56 @@ def score_board(gs):
             piece = gs.board[row][col]
             if piece:
                 value = piece_score[piece.type]
+
+                pos_bonus = 0
+                
+                if piece.type == 'pawn':
+                    if piece.color == 'white':
+                        pos_bonus = whitePawnScore[row][col]
+                    else:
+                        pos_bonus = blackPawnScore[row][col] # Already flipped in definition
+                        
+                elif piece.type == 'knight':
+                    table = knightScore
+                    if piece.color == 'white':
+                        pos_bonus = table[row][col]
+                    else:
+                        pos_bonus = table[7-row][col] # Flip for Black
+                        
+                elif piece.type == 'bishop':
+                    table = bishopScore
+                    if piece.color == 'white':
+                        pos_bonus = bishopScore[row][col]
+                    else:
+                        pos_bonus = table[7-row][col]
+                        
+                elif piece.type == 'rook':
+                    table = rookScore
+                    if piece.color == 'white':
+                        pos_bonus = table[row][col]
+                    else:
+                        pos_bonus = table[7-row][col]
+                        
+                elif piece.type == 'queen':
+                    table = queenScore
+                    if piece.color == 'white':
+                        pos_bonus = table[row][col]
+                    else:
+                        pos_bonus = table[7-row][col]
+                
+                elif piece.type == 'king':
+                    table = kingScore
+                    if piece.color == 'white':
+                        pos_bonus = table[row][col]
+                    else:
+                        pos_bonus = table[7-row][col]
+                value += pos_bonus * 0.1
+                
                 if piece.color == "white":
                     score += value
                 else:
                     score -= value # Black pieces subtract from the score
+                
     return score
 
 def get_all_valid_moves(gs, color):
