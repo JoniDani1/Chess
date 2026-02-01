@@ -1,6 +1,5 @@
 PROJECT: Pygame Chess Implementation
 STUDENT: JONI DANI
-5
 MODULE: Programming
 
 
