@@ -77,6 +77,29 @@ kingScore = [
     [-3, -4, -4, -5, -5, -4, -4, -3]
 ]
 
+def order_moves(gs, valid_moves):
+    def score_move(move):
+        score = 0
+        move_start_row, move_start_col = move[0]
+        move_end_row, move_end_col = move[1]
+        
+        # Check if we are capturing a piece
+        capturedPiece = gs.board[move_end_row][move_end_col]
+        if capturedPiece: # If target square is not empty
+            # Score 10 points for any capture
+            score += 10
+            
+            # Bonus: MVV-LVA (Capture high value with low value)
+            attacker = gs.board[move_start_row][move_start_col]
+            if attacker:
+                score += piece_score[capturedPiece.type] - (piece_score[attacker.type] / 10)
+            
+        return score
+
+    # Sort moves: Highest score first
+    valid_moves.sort(key=score_move, reverse=True)
+    return valid_moves
+
 def find_best_move(gs, valid_moves):
     global next_move
     next_move = None
@@ -97,8 +120,9 @@ def find_best_move(gs, valid_moves):
     
     print(f"Turn {current_turn}: AI Strategy set to Depth {DEPTH}")
     
+    ordered_moves = order_moves(gs, valid_moves)
     # Start the recursive search
-    find_move_minimax(gs, valid_moves, DEPTH, alpha, beta, gs.white_to_move)
+    find_move_minimax(gs, ordered_moves, DEPTH, alpha, beta, gs.white_to_move)
     
     return next_move
 
@@ -229,4 +253,4 @@ def get_all_valid_moves(gs, color):
                 valid_moves = gs.get_safe_moves(piece, r, c)
                 for target in valid_moves:
                     moves.append(((r, c), target)) 
-    return moves
+    return order_moves(gs, moves)
