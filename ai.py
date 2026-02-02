@@ -1,14 +1,17 @@
 import random
 from engine import GameState
-import threading
+import math
 # 1. THE BRAIN: This dictionary determines the AI's personality.
 # Try changing these values later! (e.g., make 'pawn' worth 10 to see it become greedy)
 piece_score = {"king": 0, "queen": 9, "rook": 5, "bishop": 3, "knight": 3, "pawn": 1}
 gs = GameState()
+
 CHECKMATE = 1000
 STALEMATE = 0
 DEPTH = 3  # Depth 2 = AI looks at: Its Move -> Your Reply. (Fast)
            # Depth 3 = AI looks at: Its Move -> Your Reply -> Its Reply. (Slower but smarter)
+
+
 
 knightScore =  [[1, 1, 1, 1, 1, 1, 1, 1],
                 [1, 2, 2, 2, 2, 2, 2, 1],
@@ -30,10 +33,10 @@ bishopScore =  [[4, 3, 2, 1, 1, 2, 3, 4],
 
 queenScore =   [[1, 1, 1, 3, 1, 1, 1, 1],
                 [1, 2, 3, 3, 3, 1, 1, 1],
-                [1, 4, 3, 3, 3, 4, 2, 1],
+                [1, 3, 3, 3, 3, 3, 2, 1],
                 [1, 2, 3, 3, 3, 2, 2, 1],
                 [1, 2, 3, 3, 3, 2, 2, 1],
-                [1, 4, 3, 3, 3, 4, 2, 1],
+                [1, 3, 3, 3, 3, 3, 2, 1],
                 [1, 2, 3, 3, 3, 1, 1, 1],
                 [1, 1, 1, 3, 1, 1, 1, 1]]
 
@@ -77,14 +80,29 @@ kingScore = [
 def find_best_move(gs, valid_moves):
     global next_move
     next_move = None
+    global DEPTH
+    alpha = -CHECKMATE
+    beta = CHECKMATE
+
     random.shuffle(valid_moves) # Shuffle so AI doesn't play the same game every time
     
+    current_turn = len(gs.move_log) // 2
+
+    if current_turn >= 9:
+        DEPTH = 4
+    
+    if current_turn >= 30:
+        DEPTH = 5
+    
+    
+    print(f"Turn {current_turn}: AI Strategy set to Depth {DEPTH}")
+    
     # Start the recursive search
-    find_move_minimax(gs, valid_moves, DEPTH, gs.white_to_move)
+    find_move_minimax(gs, valid_moves, DEPTH, alpha, beta, gs.white_to_move)
     
     return next_move
 
-def find_move_minimax(gs, valid_moves, depth, white_to_move):
+def find_move_minimax(gs, valid_moves, depth, alpha, beta, white_to_move):
     global next_move
     
     # A. BASE CASE: If we hit max depth, just score the board and stop.
@@ -100,7 +118,7 @@ def find_move_minimax(gs, valid_moves, depth, white_to_move):
             
             # 2. RECURSE (Now it's Black's turn to minimize)
             next_moves = get_all_valid_moves(gs, 'black')
-            score = find_move_minimax(gs, next_moves, depth - 1, False)
+            score = find_move_minimax(gs, next_moves, depth - 1, alpha, beta, False)
             
             # 3. UNDO THE MOVE (Backtrack)
             gs.undo_move() 
@@ -110,6 +128,9 @@ def find_move_minimax(gs, valid_moves, depth, white_to_move):
                 max_score = score
                 if depth == DEPTH: # Only save the move at the top level
                     next_move = move
+            alpha = max(alpha,score)
+            if beta<=alpha:
+                break
                     
         return max_score
 
@@ -119,13 +140,16 @@ def find_move_minimax(gs, valid_moves, depth, white_to_move):
         for move in valid_moves:
             gs.make_move(move[0], move[1])
             next_moves = get_all_valid_moves(gs, 'white')
-            score = find_move_minimax(gs, next_moves, depth - 1, True)
+            score = find_move_minimax(gs, next_moves, depth - 1, alpha, beta, True)
             gs.undo_move()
             
             if score < min_score:
                 min_score = score
                 if depth == DEPTH:
                     next_move = move
+            beta = min(beta,score)
+            if beta<=alpha:
+                break
                     
         return min_score
 

@@ -19,19 +19,19 @@ class GameState:
         self.board = [[None for _ in range(8)] for _ in range(8)]
         # Pawns
         for col in range(8):
-           # self.board[1][col] = ChessPiece('black', 'pawn')
+            self.board[1][col] = ChessPiece('black', 'pawn')
             self.board[6][col] = ChessPiece('white', 'pawn')
         # # Rooks
-        # self.board[0][0] = self.board[0][7] = ChessPiece('black', 'rook')
-        # self.board[7][0] = self.board[7][7] = ChessPiece('white', 'rook')
+        self.board[0][0] = self.board[0][7] = ChessPiece('black', 'rook')
+        self.board[7][0] = self.board[7][7] = ChessPiece('white', 'rook')
         # # Knights
-        # self.board[0][1] = self.board[0][6] = ChessPiece('black', 'knight')
-        # self.board[7][1] = self.board[7][6] = ChessPiece('white', 'knight')
+        self.board[0][1] = self.board[0][6] = ChessPiece('black', 'knight')
+        self.board[7][1] = self.board[7][6] = ChessPiece('white', 'knight')
         # # Bishops
-        # self.board[0][2] = self.board[0][5] = ChessPiece('black', 'bishop')
-        # self.board[7][2] = self.board[7][5] = ChessPiece('white', 'bishop')
+        self.board[0][2] = self.board[0][5] = ChessPiece('black', 'bishop')
+        self.board[7][2] = self.board[7][5] = ChessPiece('white', 'bishop')
         # Queens
-        #self.board[0][3] = ChessPiece('black', 'queen')
+        self.board[0][3] = ChessPiece('black', 'queen')
         self.board[7][3] = ChessPiece('white', 'queen')
         # Kings
         self.board[0][4] = ChessPiece('black', 'king')

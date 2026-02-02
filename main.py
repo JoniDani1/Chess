@@ -14,6 +14,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Chess Project")
 clock = pygame.time.Clock()
 
+
 # 3. Load Assets
 PIECE_IMAGES = {}
 def load_images():
@@ -152,6 +153,7 @@ def main():
 
     while True:
         # --- AI TURN LOGIC ---
+        
         if not game_over and not gs.white_to_move:
             valid_moves = ai.get_all_valid_moves(gs, 'black')
             best_move = ai.find_best_move(gs, valid_moves)
