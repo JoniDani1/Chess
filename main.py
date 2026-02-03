@@ -92,6 +92,11 @@ def handle_click(pos):
 
         if (row, col) in safe_moves:
             gs.make_move((start_r, start_c), (row, col))
+
+            piece = gs.board[row][col]
+            if piece.type == 'pawn' and (row == 0 or row == 7):
+                piece.type = 'queen'
+
             audio.play('move')
             selected_piece = None
             selected_pos = None
@@ -115,18 +120,6 @@ def handle_click(pos):
         if piece and ((gs.white_to_move and piece.color == 'white') or (not gs.white_to_move and piece.color == 'black')):
             selected_piece = piece
             selected_pos = (row, col)
-            
-            if selected_piece.type=='pawn' and (row==0 or row==7):
-                           
-                new_type = gs.get_promotion_choice(screen, selected_piece.color)
-                
-                selected_piece.type = new_type
-                
-                path = f"images/{selected_piece.color}_{new_type}.png"
-                try: 
-                    selected_piece.image = pygame.image.load(path)
-                    selected_piece.image = pygame.transform.scale(selected_piece.image, (SQUARE_SIZE, SQUARE_SIZE))
-                except: pass
         
         
 
@@ -160,6 +153,11 @@ def main():
             
             if best_move:
                 gs.make_move(best_move[0], best_move[1])
+                
+                end_r, end_c = best_move[1]
+                piece = gs.board[end_r][end_c]
+                if piece.type == 'pawn' and (end_r == 0 or end_r == 7):
+                    piece.type = 'queen' 
                 audio.play('move')
                 
                 # Check if AI won
