@@ -1,76 +1,60 @@
-PROJECT: Pygame Chess Implementation
-STUDENT: JONI DANI
-MODULE: Programming
+# ♟️ PyChess AI: A Multithreaded Chess Engine
 
+A high-performance Chess AI written in pure Python. It features a custom Minimax engine with Alpha-Beta pruning, running on a separate thread to ensure a responsive 60 FPS user interface.
 
-=============================================================================
-1. PROJECT DESCRIPTION
-=============================================================================
-This is a comprehensive 2-Player Chess game developed in Python using the Pygame 
-library. It implements standard chess rules including piece movement, capturing, 
-check detection, and special moves like Pawn Promotion. 
+![Chess Demo](https://via.placeholder.com/800x400?text=Insert+Gameplay+GIF+Here)
+*(Tip: Record a short GIF of you playing the AI and replace the link above!)*
 
-Unlike a basic board display, this project includes a complete game loop with 
-menus, timers, sound effects, and visual move validation.
+## 🚀 Key Features
 
-=============================================================================
-2. HOW TO RUN THE GAME
-=============================================================================
-Requirements:
-- Python 3.x
-- Pygame library (Install via: pip install pygame)
+### 🧠 The Intelligence (`ai.py`)
+* **Minimax Algorithm:** Recursively evaluates future board states to find the optimal move.
+* **Alpha-Beta Pruning:** Optimizes the search tree by ignoring "bad" branches, increasing efficiency by ~10x.
+* **Move Ordering (MVV-LVA):** Prioritizes capturing high-value pieces with low-value pieces to find "killer moves" faster.
+* **Dynamic Depth:** Automatically scales difficulty (Depth 4 in opening → Depth 5 in endgame) to balance speed and accuracy.
+* **Positional Heuristics:** Uses Piece-Square Tables to understand that a Knight in the center is better than a Knight on the edge.
 
-Installation & Execution:
-1. Unzip the submission folder.
-2. Ensure the following structure exists:
-   /ProjectFolder
-      |-- main.py
-      |-- /images          (Contains .png files for all pieces)
-      |-- move.wav
-      |-- capture.wav
-      |-- notify.wav
-3. Open a terminal/command prompt in this folder.
-4. Run the command:
-   python main.py
+### ⚡ Engineering & Performance
+* **Multithreading:** The AI runs in a background daemon thread using `threading` and `queue`. This prevents the UI from freezing/locking up during deep calculations.
+* **State Management:** Implements `copy.deepcopy` to prevent "State Bleeding" (visual glitches) between the rendering thread and the calculation thread.
+* **Type Safety:** Fully type-hinted codebase for robustness and maintainability.
 
-=============================================================================
-3. IMPLEMENTED FEATURES & CUSTOM CLASSES
-=============================================================================
-Per the assignment requirements, I have implemented several custom classes to 
-handle game complexity and state management:
+## 🛠️ Installation
 
-A. Class SoundManager (New Functionality)
-   - Handles the loading and playback of audio cues (move, capture, check notification).
-   - Includes error handling: If a .wav file is missing, the game generates 
-     a silent buffer to prevent crashing.
+1.  **Clone the repository**
+    ```bash
+    git clone [https://github.com/YOUR_USERNAME/chess-ai.git](https://github.com/YOUR_USERNAME/chess-ai.git)
+    cd chess-ai
+    ```
 
-B. Class Timer (New Functionality)
-   - Implements a Blitz-style countdown timer (10 minutes per player).
-   - Handles time-delta calculations and updates the game state to "Game Over" 
-     if a player's clock hits 00:00.
+2.  **Install Dependencies**
+    This project requires `pygame`.
+    ```bash
+    pip install pygame
+    ```
 
-C. Class ChessPiece
-   - Encapsulates piece data (color, type, movement status).
-   - Manages sprite loading with a fallback system: if an image fails to load, 
-     it generates a placeholder graphic so the game remains playable.
+3.  **Run the Game**
+    ```bash
+    python main.py
+    ```
 
-D. Class Button
-   - Created for the Main Menu interface.
-   - Handles collision detection for mouse clicks and hover effects 
-     (changing color when the mouse is over the button).
+## 🎮 Controls
+* **Mouse:** Click and drag (or click-click) to move pieces.
+* **Z Key:** Undo the last move.
+* **Space Bar:** Reset the game (only when Game Over).
 
-=============================================================================
-4. GAMEPLAY CONTROLS
-=============================================================================
-- MOUSE: Left-click to select a piece. Valid moves will be highlighted in green.
-         Click a highlighted square to move.
-- PROMOTION: When a pawn reaches the opposite side, a clickable menu appears 
-             to select the promotion piece (Queen, Rook, Knight, Bishop).
-- SPACEBAR: Resets the game after a Checkmate, Stalemate, or Timeout.
+## 📂 Project Structure
 
-=============================================================================
-5. ASSETS & CREDITS
-=============================================================================
-- Logic: Implemented using standard Chess rules and Pygame event handling.
-- Images: Chess piece sprites located in the /images directory.
-- Audio: Custom sound effects for user feedback.
+* `main.py`: The entry point. Handles the Event Loop, Threading, and Rendering.
+* `engine.py`: The "Model". Validates moves, handles castling/promotion logic, and stores the board state.
+* `ai.py`: The "Brain". Contains the Minimax recursion and evaluation functions.
+* `settings.py`: Configuration (Colors, Screen Size, FPS).
+* `components.py`: Helper classes for UI (Buttons, Sound Manager).
+
+## 🔮 Future Improvements
+* **Transposition Tables:** Implement Zobrist Hashing to cache board states and speed up calculations.
+* **WebAssembly Port:** Optimize the threading model to run in the browser using `pygbag`.
+* **Opening Book:** Add a database of standard opening moves to play instantly in the early game.
+
+---
+*Built with Python 3 and Pygame.*
