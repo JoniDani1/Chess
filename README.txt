@@ -2,6 +2,8 @@
 
 A high-performance Chess AI written in pure Python. It features a custom Minimax engine with Alpha-Beta pruning, running on a separate thread to ensure a responsive 60 FPS user interface.
 
+https://github.com/JoniDani1/Chess/issues/1#issue-3898654330
+
 
 
 ## 🚀 Key Features
