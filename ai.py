@@ -1,8 +1,8 @@
 import random
 from engine import GameState
 import math
+from typing import List, Tuple, Optional
 # 1. THE BRAIN: This dictionary determines the AI's personality.
-# Try changing these values later! (e.g., make 'pawn' worth 10 to see it become greedy)
 piece_score = {"king": 0, "queen": 9, "rook": 5, "bishop": 3, "knight": 3, "pawn": 1}
 gs = GameState()
 
@@ -83,7 +83,6 @@ def order_moves(gs, valid_moves):
         move_start_row, move_start_col = move[0]
         move_end_row, move_end_col = move[1]
         
-        # Check if we are capturing a piece
         capturedPiece = gs.board[move_end_row][move_end_col]
         if capturedPiece: # If target square is not empty
             # Score 10 points for any capture
@@ -100,7 +99,7 @@ def order_moves(gs, valid_moves):
     valid_moves.sort(key=score_move, reverse=True)
     return valid_moves
 
-def find_best_move(gs, valid_moves):
+def find_best_move(gs: GameState, valid_moves: List[Tuple[Tuple[int, int], Tuple[int, int]]]) -> Optional[Tuple]:
     global next_move
     next_move = None
     global DEPTH
@@ -121,36 +120,36 @@ def find_best_move(gs, valid_moves):
     print(f"Turn {current_turn}: AI Strategy set to Depth {DEPTH}")
     
     ordered_moves = order_moves(gs, valid_moves)
-    # Start the recursive search
+
     find_move_minimax(gs, ordered_moves, DEPTH, alpha, beta, gs.white_to_move)
     
     return next_move
 
-def find_move_minimax(gs, valid_moves, depth, alpha, beta, white_to_move):
+
+def find_move_minimax(gs: GameState, valid_moves: list, depth: int, alpha: int, beta: int, white_to_move: bool) -> int:
     global next_move
     
-    # A. BASE CASE: If we hit max depth, just score the board and stop.
     if depth == 0:
         return score_board(gs)
     
-    # B. MAXIMIZING (White wants POSITIVE score)
     if white_to_move:
-        max_score = -CHECKMATE # Start with worst possible score
+        max_score = -CHECKMATE 
         for move in valid_moves:
-            # 1. SIMULATE THE MOVE
+            
             gs.make_move(move[0], move[1]) 
             
-            # 2. RECURSE (Now it's Black's turn to minimize)
+           
             next_moves = get_all_valid_moves(gs, 'black')
             score = find_move_minimax(gs, next_moves, depth - 1, alpha, beta, False)
             
-            # 3. UNDO THE MOVE (Backtrack)
+            
             gs.undo_move() 
             
-            # 4. COMPARE
+            
             if score > max_score:
                 max_score = score
-                if depth == DEPTH: # Only save the move at the top level
+
+                if depth == DEPTH: 
                     next_move = move
             alpha = max(alpha,score)
             if beta<=alpha:
@@ -158,9 +157,9 @@ def find_move_minimax(gs, valid_moves, depth, alpha, beta, white_to_move):
                     
         return max_score
 
-    # C. MINIMIZING (Black wants NEGATIVE score)
+    
     else: 
-        min_score = CHECKMATE + 100 # Start with worst possible score (Positive is bad for Black)
+        min_score = CHECKMATE + 100 
         for move in valid_moves:
             gs.make_move(move[0], move[1])
             next_moves = get_all_valid_moves(gs, 'white')
@@ -178,7 +177,6 @@ def find_move_minimax(gs, valid_moves, depth, alpha, beta, white_to_move):
         return min_score
 
 def score_board(gs):
-    # If the game is over, return extreme scores
     if gs.is_check('white') and not get_all_valid_moves(gs, 'white'):
         return -CHECKMATE # Black Wins
     if gs.is_check('black') and not get_all_valid_moves(gs, 'black'):
@@ -198,7 +196,7 @@ def score_board(gs):
                     if piece.color == 'white':
                         pos_bonus = whitePawnScore[row][col]
                     else:
-                        pos_bonus = blackPawnScore[row][col] # Already flipped in definition
+                        pos_bonus = blackPawnScore[row][col] 
                         
                 elif piece.type == 'knight':
                     table = knightScore
@@ -244,7 +242,7 @@ def score_board(gs):
     return score
 
 def get_all_valid_moves(gs, color):
-    # Helper to get every possible move for a specific color
+    
     moves = []
     for r in range(8):
         for c in range(8):

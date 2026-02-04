@@ -1,6 +1,7 @@
 from settings import *
 import pygame
 import sys
+from typing import List, Tuple
 
 class ChessPiece:
     def __init__(self, color, type):
@@ -37,7 +38,7 @@ class GameState:
         self.board[0][4] = ChessPiece('black', 'king')
         self.board[7][4] = ChessPiece('white', 'king')
 
-    def make_move(self, start_pos, end_pos):
+    def make_move(self, start_pos: Tuple[int, int], end_pos: Tuple[int, int]) -> None:
         r_start, c_start = start_pos
         r_end, c_end = end_pos
         
@@ -63,13 +64,13 @@ class GameState:
             # Kingside Castle (Moves Right)
             if c_end > c_start: 
                 rook = self.board[r_start][7]
-                self.board[r_start][5] = rook # Move Rook to F-file
+                self.board[r_start][5] = rook 
                 self.board[r_start][7] = None
                 rook.has_moved = True
             # Queenside Castle (Moves Left)
             else: 
                 rook = self.board[r_start][0]
-                self.board[r_start][3] = rook # Move Rook to D-file
+                self.board[r_start][3] = rook 
                 self.board[r_start][0] = None
                 rook.has_moved = True
 
@@ -105,7 +106,7 @@ class GameState:
         self.white_to_move = True
         self.move_log = []
 
-    def get_valid_moves(self, piece, row, col):
+    def get_valid_moves(self, piece: 'ChessPiece', row: int, col: int) -> List[Tuple[int, int]]:
         moves = []
         if piece.type == 'pawn':
             direction = -1 if piece.color == 'white' else 1
@@ -204,7 +205,7 @@ class GameState:
         if not king_pos: return False
         return self.is_square_attacked(king_pos[0], king_pos[1], color)
 
-    def get_safe_moves(self, piece, row, col):
+    def get_safe_moves(self, piece: 'ChessPiece', row: int, col: int) -> List[Tuple[int, int]]:
         moves = self.get_valid_moves(piece, row, col)
         safe = []
         for m in moves:

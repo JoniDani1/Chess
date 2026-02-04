@@ -4,6 +4,9 @@ import ai
 from settings import *
 from components import *
 from engine import GameState
+import threading 
+import queue
+import copy
 
 # 1. Initialize Pygame
 pygame.init()
@@ -37,7 +40,7 @@ load_images()
 selected_piece = None
 selected_pos = None
 
-# Variables for Game Over State
+
 game_over = False
 winner_text = ""
 
@@ -77,12 +80,11 @@ def draw_board():
 def handle_click(pos):
     global selected_piece, selected_pos, game_over, winner_text
     
-    if game_over: return
+    
 
     col, row = pos[0] // SQUARE_SIZE, pos[1] // SQUARE_SIZE
     
-    
-        
+
     if selected_piece:
         start_r, start_c = selected_pos
 
@@ -103,12 +105,13 @@ def handle_click(pos):
             
             
             # Check for Checkmate / Game Over
-            turn = 'white' if gs.white_to_move else 'black'
-            if gs.is_game_over_check(turn):
+            #turn = 'white' if gs.white_to_move else 'black'
+            if gs.is_game_over_check("white"):
                 game_over = True
                 audio.play("notify")
-                if gs.is_check(turn):
-                    winner_text = f"Checkmate! {'Black' if turn=='white' else 'White'} Wins!"
+                if gs.is_check("white"):
+                    winner_text = f"Checkmate! Black Wins!"
+                    print("Black Wins")
                 else:
                     winner_text = "Stalemate!"
         else:
@@ -138,68 +141,113 @@ def reset_game():
     # 3. Reset the Engine (The Brain)
     gs.reset()
 
-# --- MAIN LOOP ---
+def ai_worker(gs, return_queue):
+    """
+    Runs the AI logic in a separate thread to prevent UI freezing.
+    """
+    # Generate moves and find the best one
+    valid_moves = ai.get_all_valid_moves(gs, 'black')
+    if valid_moves:
+        best_move = ai.find_best_move(gs, valid_moves)
+        return_queue.put(best_move) 
+    else:
+        return_queue.put(None)
+
+
 def main():
-    # --- ADD THIS LINE TO FIX THE ERROR ---
     global game_over, winner_text
-    # --------------------------------------
+
+   
+    ai_thinking = False
+    ai_queue = queue.Queue() 
+    ai_thread = None
 
     while True:
-        # --- AI TURN LOGIC ---
-        
+    
         if not game_over and not gs.white_to_move:
-            valid_moves = ai.get_all_valid_moves(gs, 'black')
-            best_move = ai.find_best_move(gs, valid_moves)
             
-            if best_move:
-                gs.make_move(best_move[0], best_move[1])
+            # A. If AI is NOT thinking yet, start the thread
+            if not ai_thinking:
+                print("Starting AI Thread...") 
+                ai_thinking = True
                 
-                end_r, end_c = best_move[1]
-                piece = gs.board[end_r][end_c]
-                if piece.type == 'pawn' and (end_r == 0 or end_r == 7):
-                    piece.type = 'queen' 
-                audio.play('move')
                 
-                # Check if AI won
-                if gs.is_game_over_check('white'):
+                # We send a "Deep Copy" (clone) of the game state to the worker.
+                # Now the AI can mess up this clone without affecting the screen.
+                gs_clone = copy.deepcopy(gs) 
+                
+                ai_thread = threading.Thread(target=ai_worker, args=(gs_clone, ai_queue))
+                
+                ai_thread.daemon = True 
+                ai_thread.start()
+            
+           
+            if not ai_queue.empty():
+                best_move = ai_queue.get() # Grab the move from the queue
+                
+                # Apply the move
+                if best_move:
+                    gs.make_move(best_move[0], best_move[1])
+                    
+                    
+                    end_r, end_c = best_move[1]
+                    piece = gs.board[end_r][end_c]
+                    # ... (Auto-Queen Logic) ...
+                    if piece.type == 'pawn' and (end_r == 0 or end_r == 7):
+                        piece.type = 'queen' 
+                        
+                    audio.play('move')
+                    
+                    # --- NEW CODE START ---
+                    # After Black moves, check if White (Human) is checkmated!
+                    if gs.is_game_over_check('white'):
+                        game_over = True
+                        audio.play("notify")
+                        if gs.is_check('white'):
+                            winner_text = "Checkmate! Black Wins!"
+                        else:
+                            winner_text = "Stalemate!"
+                   
+                    
+                else:
                     game_over = True
                     audio.play("notify")
-                    if gs.is_check('white'):
-                        winner_text = "Checkmate! Black Wins!"
-                    else:
-                        winner_text = "Stalemate!"
-                elif gs.is_game_over_check('black'):
-                    game_over = True
-                    audio.play("notify")
-                    if gs.is_check("black"):
+                    
+                    if gs.is_check('black'):
                         winner_text = "Checkmate! White Wins!"
                     else:
-                        winner_text = "Stalemate"
-            else:
-                # 2. Safety Fallback: If AI returns None (panic), make a random move
-                import random
-                if valid_moves:
-                    random_move = valid_moves[random.randint(0, len(valid_moves)-1)]
-                    gs.make_move(random_move[0], random_move[1])
-                    audio.play('move')
+                        winner_text = "Stalemate!"
+                
+                ai_thinking = False
 
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             
-            if event.type == pygame.MOUSEBUTTONDOWN and gs.white_to_move:
-                handle_click(pygame.mouse.get_pos())
-                
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_z:
-                    gs.undo_move()
+            
+            if not ai_thinking:
+                if event.type == pygame.MOUSEBUTTONDOWN and gs.white_to_move:
+                    handle_click(pygame.mouse.get_pos())
+                    
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_z:
+                        gs.undo_move()
+                    if event.key == pygame.K_SPACE:
+                        if game_over:
+                            reset_game()
 
-                if event.key == pygame.K_SPACE:
-                    if game_over:
-                        reset_game()
-
+        
         draw_board()
+
+       
+        if ai_thinking:
+            # Draw a small text box so user knows AI is working
+            font_small = pygame.font.SysFont('Arial', 30, True)
+            txt = font_small.render("AI Thinking...", True, (255, 0, 0))
+            screen.blit(txt, (10, 10)) # Top left corner
+
         pygame.display.flip()
         clock.tick(FPS)
 
