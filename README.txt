@@ -2,8 +2,7 @@
 
 A high-performance Chess AI written in pure Python. It features a custom Minimax engine with Alpha-Beta pruning, running on a separate thread to ensure a responsive 60 FPS user interface.
 
-![Chess Demo](https://via.placeholder.com/800x400?text=Insert+Gameplay+GIF+Here)
-*(Tip: Record a short GIF of you playing the AI and replace the link above!)*
+
 
 ## 🚀 Key Features
 
