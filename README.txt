@@ -2,8 +2,8 @@
 
 A high-performance Chess AI written in pure Python. It features a custom Minimax engine with Alpha-Beta pruning, running on a separate thread to ensure a responsive 60 FPS user interface.
 
-![Chess Demo](https://via.placeholder.com/800x400?text=Insert+Gameplay+GIF+Here)
-*(Tip: Record a short GIF of you playing the AI and replace the link above!)*
+![Chess Gameplay](https://github.com/JoniDani1/Chess/blob/main/Chess.png?raw=true)
+
 
 ## 🚀 Key Features
 
@@ -23,8 +23,8 @@ A high-performance Chess AI written in pure Python. It features a custom Minimax
 
 1.  **Clone the repository**
     ```bash
-    git clone [https://github.com/YOUR_USERNAME/chess-ai.git](https://github.com/YOUR_USERNAME/chess-ai.git)
-    cd chess-ai
+    git clone [https://github.com/YOUR_USERNAME/chess-ai.git](https://github.com/JoniDani1/Chess.git)
+    cd Chess
     ```
 
 2.  **Install Dependencies**
