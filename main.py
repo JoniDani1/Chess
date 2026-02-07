@@ -7,6 +7,7 @@ from engine import GameState
 import threading 
 import queue
 import copy
+import asyncio
 
 # 1. Initialize Pygame
 pygame.init()
@@ -154,7 +155,7 @@ def ai_worker(gs, return_queue):
         return_queue.put(None)
 
 
-def main():
+async def main():
     global game_over, winner_text
 
    
@@ -250,8 +251,9 @@ def main():
 
         pygame.display.flip()
         clock.tick(FPS)
+        await asyncio.sleep(0)
 
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
